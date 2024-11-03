@@ -40,7 +40,9 @@ int aux_scan(struct aux *self, FILE *input)
 {
   int countCitations = 0;
   int commandLength = 0;
+  int incommand = 0;
   char command[MAX_COMMAND_LENGTH];
+  char parameter[MAX_COMMAND_LENGTH];
   char c;
 
   while ((c = fgetc(input)) != EOF) {
@@ -54,13 +56,29 @@ int aux_scan(struct aux *self, FILE *input)
         {
           countCitations++;
         }
-        // process command
-        commandLength = 0;
       }
+
+      commandLength = 0;
+      incommand = c == '\\';
+    }
+    else if (c == '}')
+    {
+      parameter[commandLength] = '\0';
+      printf("Parameter detected: %s\n", parameter);
+
+      if (strcmp(command, "bibdata") == 0)
+      {
+        strcpy(self->bibfile, parameter);
+      }
+
+      commandLength = 0;
     }
     else if (commandLength < MAX_COMMAND_LENGTH - 1)
     {
-      command[commandLength++] = c;
+      if (incommand)
+        command[commandLength++] = c;
+      else
+        parameter[commandLength++] = c;
     }
     else
     {
@@ -76,7 +94,7 @@ int aux_scan(struct aux *self, FILE *input)
     // process command
   }
 
-  printf("%d citations detected.\n", countCitations);
+  printf("%d citations detected to be extracted from: %s.bib.\n", countCitations, self->bibfile);
 
   return 0;
 }
