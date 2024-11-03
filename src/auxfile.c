@@ -4,6 +4,7 @@
 #include <string.h>
 
 #define MAX_COMMAND_LENGTH 1024
+#define MAX_ENTRIES 1024
 
 struct aux *aux_init(char *auxfile)
 {
@@ -14,6 +15,7 @@ struct aux *aux_init(char *auxfile)
   sprintf(filename, "%s.aux", auxfile);
 
   auxdata = malloc(sizeof(struct aux));
+  auxdata->entries = malloc(sizeof(char *) * MAX_ENTRIES);
 
   input = fopen(filename, "r");
 
@@ -52,10 +54,6 @@ int aux_scan(struct aux *self, FILE *input)
       {
         command[commandLength] = '\0';
         printf("Command detected: %s\n", command);
-        if (strcmp(command, "citation") == 0)
-        {
-          countCitations++;
-        }
       }
 
       commandLength = 0;
@@ -71,6 +69,17 @@ int aux_scan(struct aux *self, FILE *input)
         strcpy(self->bibfile, parameter);
       }
 
+      if (strcmp(command, "citation") == 0)
+      {
+        if (countCitations < MAX_ENTRIES)
+        {
+          self->entries[countCitations] = malloc(sizeof(char) * strlen(parameter));
+          strcpy(self->entries[countCitations], parameter);
+        }
+
+        countCitations++;
+      }
+
       commandLength = 0;
     }
     else if (commandLength < MAX_COMMAND_LENGTH - 1)
@@ -82,19 +91,22 @@ int aux_scan(struct aux *self, FILE *input)
     }
     else
     {
-      fprintf(stderr, "Warning: Command too long, truncating.\n");
+      fprintf(stderr, "Warning: Command or parameter too long, truncating.\n");
       commandLength = 0;
     }
   }
 
-  // EOF reached
-  if (commandLength > 0)
-  {
-    command[commandLength] = '\0';
-    // process command
-  }
+  if (countCitations > MAX_ENTRIES)
+    fprintf(stderr, "Warning: found more citations than can be managed. Recorded only the first %d.\n", MAX_ENTRIES);
+
+  // We do not worry about a command that ends at the end of the
+  // file, because if it was a bibliography entry, we would have
+  // reached a closing curly bracket first.
 
   printf("%d citations detected to be extracted from: %s.bib.\n", countCitations, self->bibfile);
+
+  for (int i = 0; i < countCitations; i++) 
+    printf("Found: %s\n", self->entries[i]);
 
   return 0;
 }
