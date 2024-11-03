@@ -4,6 +4,7 @@
 int main(int argc, char **argv)
 {
   int c;
+  char *auxfile;
 
   while ((c = getopt(argc, argv, "")) != -1)
   {
@@ -17,7 +18,7 @@ int main(int argc, char **argv)
 
   if (optind < argc)
   {
-    printf("Filename: %s\n", argv[optind]);
+    auxfile = argv[optind];
   } else {
     fprintf(stderr, "Filename required. Usage: %s filename\n", argv[0]);
     return 1;
