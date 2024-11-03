@@ -10,17 +10,17 @@ OBJ_FILES = $(patsubst $(SRC_DIR)/%.c, $(BIN_DIR)/%.o, $(SRC_FILES))
 all: $(TARGET)
 
 $(TARGET): $(OBJ_FILES)
- @echo "Linking..."
- $(CC) $(CFLAGS) -o $@ $^
+	@echo "Linking..."
+	$(CC) $(CFLAGS) -o $@ $^
 
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.c | $(BIN_DIR)
- @echo "Compiling $<..."
- $(CC) $(CFLAGS) -c $< -o $@
+	@echo "Compiling $<..."
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BIN_DIR):
- @mkdir -p $(BIN_DIR)
+	@mkdir -p $(BIN_DIR)
 
 clean:
- @echo "Cleaning up..."
- rm -rf $(BIN_DIR)/*.o $(TARGET)
+	@echo "Cleaning up..."
+	rm -rf $(BIN_DIR)/*.o $(TARGET)
  
