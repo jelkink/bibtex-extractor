@@ -8,9 +8,9 @@ struct aux {
   char **entries;
 };
 
-struct aux *aux_init(char *auxfile);
+struct aux *aux_init();
 void aux_clear(struct aux *self);
 
-int aux_scan(struct aux *self, FILE *input);
+int aux_scan(struct aux *self, char *auxfile);
 
 #endif
