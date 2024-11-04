@@ -43,26 +43,25 @@ int aux_scan(struct aux *self, FILE *input)
   int countCitations = 0;
   int commandLength = 0;
   int incommand = 0;
+  int i;
   char command[MAX_COMMAND_LENGTH];
   char parameter[MAX_COMMAND_LENGTH];
   char c;
+
+  printf("Scanning AUX file...\n");
 
   while ((c = fgetc(input)) != EOF) {
     if (c == '\\' || c == '{')
     {
       if (commandLength > 0)
-      {
         command[commandLength] = '\0';
-        printf("Command detected: %s\n", command);
-      }
 
       commandLength = 0;
       incommand = c == '\\';
     }
-    else if (c == '}')
+    else if (c == '}' || c == ',')
     {
       parameter[commandLength] = '\0';
-      printf("Parameter detected: %s\n", parameter);
 
       if (strcmp(command, "bibdata") == 0)
       {
@@ -71,13 +70,16 @@ int aux_scan(struct aux *self, FILE *input)
 
       if (strcmp(command, "citation") == 0)
       {
-        if (countCitations < MAX_ENTRIES)
+        for (i = 0; i < countCitations; i++)
+          if (strcmp(self->entries[i], parameter) == 0)
+            break;
+
+        if (i == countCitations && countCitations < MAX_ENTRIES)
         {
           self->entries[countCitations] = malloc(sizeof(char) * strlen(parameter));
           strcpy(self->entries[countCitations], parameter);
+          countCitations++;
         }
-
-        countCitations++;
       }
 
       commandLength = 0;
@@ -103,7 +105,7 @@ int aux_scan(struct aux *self, FILE *input)
   // file, because if it was a bibliography entry, we would have
   // reached a closing curly bracket first.
 
-  printf("%d citations detected to be extracted from: %s.bib.\n", countCitations, self->bibfile);
+  printf("%d unique citations detected to be extracted from: %s.bib.\n", countCitations, self->bibfile);
 
   for (int i = 0; i < countCitations; i++) 
     printf("Found: %s\n", self->entries[i]);
