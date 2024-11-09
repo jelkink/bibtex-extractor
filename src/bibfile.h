@@ -2,19 +2,10 @@
 #define _BIBFILE_H
 
 #include "auxfile.h"
-
-
-struct bibentry {
-  char label[80];
-  int n_items;
-  char **item_labels;
-  char **item_values;
-};
+#include "bibentry.h"
 
 struct bib {
-  int n_entries;
-  struct bibentry *entries;
-  struct bib *next;
+  struct bibentry *root;
 };
 
 struct bib *bib_init();
